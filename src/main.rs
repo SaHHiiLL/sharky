@@ -1,49 +1,13 @@
-use std:: { fs, io };
-use std::io::Read;
-use serde::{Deserialize, Serialize};
-use std::process;
-    /// https://docs.rs/ssh/latest/ssh/
+mod commands;
 
-fn main() {
+use std::{fs, io, io::Read, io::Write};
+use std::fmt::format;
+use std::process::Command;
 
-    println!("***********Welcome to Sharky**************");
 
-    let content = fs::read_to_string("credentials.json");
 
-    if let Err(e) = content {
-        println!("Application Error: {}", e);
-        process::exit(1);
-    }
-    let x: Vec<Credentials> = serde_json::from_str(content.unwrap()
-                                        .as_str())
-                                        .unwrap();
-
-    println!("{:?}", &x);
-    println!("Which connection would you like to swim in?");
-    for creds in &x {
-      println!("{}", creds.name);
-    }
-    let mut cred_name = "linode";
-    
-    match get_cred(cred_name , &x) {
-        Ok(c) => println!("Got success {:?}", c), 
-        Err(_) => {
-            println!("Error, could not find the sharky in your json file!");
-            process::exit(1);
-        },
-    }
-}
-
-fn get_cred<'a>(cred_name: &str, creds: &'a Vec<Credentials>) 
-    -> Result<&'a Credentials, ()>
-{
-    for x in creds{
-        if cred_name == x.name {
-            return Ok(x);
-        }
-    }
-    Err(())
-}
+use serde::{ Serialize, Deserialize };
+use crate::commands::Commandz;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Credentials {
@@ -52,3 +16,55 @@ pub struct Credentials {
     pub username: Option<String>,
     pub password: String,
 }
+
+pub fn main() {
+    let file_content = fs::read_to_string("credentials.json");
+
+    //exit if could not find credentials.json
+    if let Err(e) = file_content {
+        println!("Could not load file! {:?}", e);
+        std::process::exit(1);
+    }
+
+    let mut creds: Vec<Credentials> = serde_json::from_str(
+        file_content.unwrap().as_str()
+    ).expect("Could not parse json");
+
+    for i in 0..creds.len() {
+        println!("{}. {}", i, creds.get(i).unwrap().name)
+    }
+
+    infinite_input_asker(creds)
+
+}
+
+fn infinite_input_asker(mut creds: Vec<Credentials>){
+    loop {
+        print!("Sharky~> ");
+        let mut input = String::new();
+
+        io::stdout().flush().expect("flush failed!");
+
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Cannot read line");
+
+        parse_command(input.trim().to_string(), &mut creds);
+    }
+}
+
+enum ParseResponse {
+    VALID, INVALID
+}
+fn parse_command(input: String, x: &mut Vec<Credentials>) {
+    if input.starts_with("list") {
+        commands::list_network(input);
+    }else if input.starts_with("join") {
+        println!("Not yet implemented")
+    }else if input.starts_with("create"){
+        println!("Not yet implemented")
+    }else {
+        println!("not a valid command!")
+    }
+}
+
