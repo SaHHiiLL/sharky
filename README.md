@@ -23,3 +23,9 @@ list
 -join <NUMBER OF INDEX>
 -create --username <user name> --ip <IP address> --password <password>
 ```
+
+
+# Refrences 
+https://github.com/manuels/libssh.rs/blob/master/example.rs
+https://docs.rs/ssh/latest/ssh/
+

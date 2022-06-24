@@ -2,12 +2,13 @@ mod commands;
 
 use std::{fs, io, io::Read, io::Write};
 use std::fmt::format;
+use std::future::Future;
 use std::process::Command;
 
 
 
 use serde::{ Serialize, Deserialize };
-use crate::commands::Commandz;
+use tokio::runtime;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Credentials {
@@ -57,14 +58,31 @@ enum ParseResponse {
     VALID, INVALID
 }
 fn parse_command(input: String, x: &mut Vec<Credentials>) {
-    if input.starts_with("list") {
-        commands::list_network(input);
-    }else if input.starts_with("join") {
-        println!("Not yet implemented")
-    }else if input.starts_with("create"){
-        println!("Not yet implemented")
-    }else {
-        println!("not a valid command!")
-    }
+    let input: Vec<&str>= input.split("\\s+").collect();
+    // if input.starts_with("list") {
+    //     commands::list_network(input);
+    // }else if input.starts_with("join") {
+    //     let rt = runtime::Builder::new_current_thread().build().unwrap();
+    //     rt.block_on(commands::join_session(input, x))
+    // }else if input.starts_with("create"){
+    //     println!("Not yet implemented")
+    // }else {
+    //     println!("not a valid command!")
+    // }
+
+    let i = *input.iter().next().unwrap();
+
+
+
+    match i {
+        "list" => commands::list_network(i.to_string()),
+        "join" => block_future(commands::join_session(i.to_string(), x)),
+        "create" => todo!(),
+        _ => {eprintln!("Not a Valid command")}
+    };
 }
 
+fn block_future<F: Future>(future: F)  {
+    let rt = runtime::Builder::new_current_thread().build().unwrap();
+    rt.block_on(future);
+}
