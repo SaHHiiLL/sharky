@@ -29,3 +29,27 @@ list
 https://github.com/manuels/libssh.rs/blob/master/example.rs
 https://docs.rs/ssh/latest/ssh/
 
+## Sample Json
+```json
+[
+  {
+    "name": "linode",
+    "ip": "12376",
+    "username": "root",
+    "password": "shdasd"
+  },
+  {
+    "name": "AWS",
+    "ip": "172.3.44.3",
+    "username": "root",
+    "password": "shdasd"
+  },
+  {
+    "name": "GCP",
+    "ip": "173.2.42.0",
+    "username": "root",
+    "password": "shdasd"
+  }
+]
+```
+
